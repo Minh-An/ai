@@ -5,16 +5,20 @@ from utils import *
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+
+# diagonal units 
+n = len(rows)
+left_diag = [rows[i] + cols[i] for i in range(n)]
+right_diag = [rows[i] + cols[n-i-1] for i in range(n)]
+
 unitlist = row_units + column_units + square_units
 
 # TODO: Update the unit list to add the new diagonal units
-unitlist = unitlist
-
+unitlist = unitlist + [left_diag] + [right_diag]
 
 # Must be called after all units (including diagonals) are added to the unitlist
 units = extract_units(unitlist, boxes)
 peers = extract_peers(units, boxes)
-
 
 def naked_twins(values):
     """Eliminate values using the naked twins strategy.
@@ -53,8 +57,19 @@ def naked_twins(values):
     Pseudocode for this algorithm on github:
     https://github.com/udacity/artificial-intelligence/blob/master/Projects/1_Sudoku/pseudocode.md
     """
-    # TODO: Implement this function!
-    raise NotImplementedError
+    naked_pairs = []
+    twos = [k for k, v in values.items() if len(v) == 2]
+    for boxA in twos:
+        for boxB in peers[boxA]:
+            if values[boxA] == values[boxB]:
+                naked_pairs.append((boxA, boxB))
+
+    for (boxA, boxB) in naked_pairs:
+        intersect = peers[boxA].intersection(peers[boxB])
+        for peer in intersect:
+            for d in values[boxA]:
+                values[peer] = values[peer].replace(d, '')
+    return values
 
 
 def eliminate(values):
@@ -73,8 +88,11 @@ def eliminate(values):
     dict
         The values dictionary with the assigned values eliminated from peers
     """
-    # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    assigned = [k for k, v in values.items() if len(v) == 1]
+    for box in assigned:
+        for peer in peers[box]:
+            values[peer] = values[peer].replace(values[box], '')
+    return values
 
 
 def only_choice(values):
@@ -97,8 +115,12 @@ def only_choice(values):
     -----
     You should be able to complete this function by copying your code from the classroom
     """
-    # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    for unit in unitlist:
+        for d in cols: 
+            places = [box for box in unit if d in values[box]]
+            if len(places) == 1:
+                values[places[0]] = d
+    return values
 
 
 def reduce_puzzle(values):
@@ -115,9 +137,17 @@ def reduce_puzzle(values):
         The values dictionary after continued application of the constraint strategies
         no longer produces any changes, or False if the puzzle is unsolvable 
     """
-    # TODO: Copy your code from the classroom and modify it to complete this function
-    raise NotImplementedError
-
+    stalled = False
+    while not stalled:
+        solved_before = len([k for k, v in values.items() if len(v) == 1])
+        eliminate(values)
+        only_choice(values)
+        solved_after = len([k for k, v in values.items() if len(v) == 1])
+        if solved_before == solved_after:
+            stalled = True
+        if len([k for k, v in values.items() if len(v) == 0]) > 0:
+            return False
+    return values
 
 def search(values):
     """Apply depth first search to solve Sudoku puzzles in order to solve puzzles
@@ -138,8 +168,22 @@ def search(values):
     You should be able to complete this function by copying your code from the classroom
     and extending it to call the naked twins strategy.
     """
-    # TODO: Copy your code from the classroom to complete this function
-    raise NotImplementedError
+    naked_twins(values)
+    values = reduce_puzzle(values)
+    if values == False:
+        return False
+
+    unsolved = [(len(v), k) for k, v in values.items() if len(v) > 1]
+    if len(unsolved) == 0:
+        return values
+
+    _, key = min(unsolved)
+    for d in values[key]:
+        copy = values.copy()
+        copy[key] = d
+        result = search(copy)
+        if result:
+            return result
 
 
 def solve(grid):
