@@ -111,7 +111,7 @@ def depthFirstSearch(problem):
                 stack.push(next_state)
                 parent[next_state] = (x, next_action)
     print("No path found")
-    return None
+    return []
 
 
 def breadthFirstSearch(problem):
@@ -174,7 +174,7 @@ def uniformCostSearch(problem):
                     pq.update(next_state, new_cost)            
                     parent[next_state] = (x, next_action, new_cost)
     print("No path found")
-    return None
+    return []
 
 def nullHeuristic(state, problem=None):
     """
@@ -219,7 +219,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                     pq.update(next_state, f)            
                     parent[next_state] = (x, next_action, new_cost)
     print("No path found")
-    return None
+    return []
 
 
 # Abbreviations
