@@ -87,17 +87,94 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # print("Start:", problem.getStartState())
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    start = problem.getStartState()
+    stack = util.Stack()
+    parent = {}
+    explored = set()
+    stack.push(start)
+    parent[start] = None
+    while not stack.isEmpty():
+        x = stack.pop()
+        explored.add(x)
+        if problem.isGoalState(x): 
+            path = []
+            while(parent[x] != None):
+                x, action = parent[x]
+                path.append(action)
+            return path[::-1]
+        successors = problem.getSuccessors(x)
+        for (next_state, next_action, _) in successors:
+            if next_state not in explored:
+                stack.push(next_state)
+                parent[next_state] = (x, next_action)
+    print("No path found")
+    return None
+
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    q = util.Queue()
+    parent = {}
+    explored = set()
+    q.push(start)
+    parent[start] = None
+    while not q.isEmpty():
+        x = q.pop()
+        explored.add(x)
+        if problem.isGoalState(x): 
+            path = []
+            while(parent[x] != None):
+                x, action = parent[x]
+                path.append(action)
+            return path[::-1]
+        successors = problem.getSuccessors(x)
+        for (next_state, next_action, _) in successors:
+            if next_state not in explored:
+                q.push(next_state)
+                parent[next_state] = (x, next_action)
+                explored.add(next_state)
+    print("No path found")
+    return []
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    
+    pq = util.PriorityQueue()
+    parent = {}
+    explored = set()
+    
+    pq.push(start, 0)
+    parent[start] = (None, None, 0)
+
+    while not pq.isEmpty():
+    
+        x= pq.pop()
+        explored.add(x)
+    
+        if problem.isGoalState(x): 
+            path = []
+            while(parent[x][0] != None):
+                x, action, _ = parent[x]
+                path.append(action)
+            return path[::-1]
+    
+        cost = parent[x][2]
+        successors = problem.getSuccessors(x)
+        for (next_state, next_action, next_cost) in successors:
+            new_cost = cost+next_cost
+            if next_state not in explored :
+                if next_state not in parent or new_cost < parent[next_state][2]:
+                    pq.update(next_state, new_cost)            
+                    parent[next_state] = (x, next_action, new_cost)
+    print("No path found")
+    return None
 
 def nullHeuristic(state, problem=None):
     """
@@ -109,7 +186,40 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    
+    pq = util.PriorityQueue()
+    parent = {}
+    explored = set()
+    
+    pq.push(start, heuristic(start, problem))
+    parent[start] = (None, None, 0)
+
+    while not pq.isEmpty():
+        x= pq.pop()
+        explored.add(x)
+
+        if problem.isGoalState(x): 
+            path = []
+            while(parent[x][0] != None):
+                x, action, _ = parent[x]
+                path.append(action)
+            return path[::-1]
+    
+        cost = parent[x][2]
+        successors = problem.getSuccessors(x)
+        for (next_state, next_action, next_cost) in successors:
+            new_cost = cost+next_cost
+            f = new_cost + heuristic(next_state, problem)
+            old_f = None
+            if next_state in parent and parent[next_state][0] != None:
+                old_f = (parent[next_state][2] + heuristic(next_state, problem))
+            if next_state not in explored :
+                if next_state not in parent or f  < old_f:
+                    pq.update(next_state, f)            
+                    parent[next_state] = (x, next_action, new_cost)
+    print("No path found")
+    return None
 
 
 # Abbreviations
