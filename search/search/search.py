@@ -110,8 +110,7 @@ def depthFirstSearch(problem):
             if next_state not in explored:
                 stack.push(next_state)
                 parent[next_state] = (x, next_action)
-    print("No path found")
-    return []
+    raise Exception("No path found")
 
 
 def breadthFirstSearch(problem):
@@ -138,8 +137,7 @@ def breadthFirstSearch(problem):
                 q.push(next_state)
                 parent[next_state] = (x, next_action)
                 explored.add(next_state)
-    print("No path found")
-    return []
+    raise Exception("No path found")
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -173,8 +171,7 @@ def uniformCostSearch(problem):
                 if next_state not in parent or new_cost < parent[next_state][2]:
                     pq.update(next_state, new_cost)            
                     parent[next_state] = (x, next_action, new_cost)
-    print("No path found")
-    return []
+    raise Exception("No path found")
 
 def nullHeuristic(state, problem=None):
     """
@@ -218,8 +215,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 if next_state not in parent or f  < old_f:
                     pq.update(next_state, f)            
                     parent[next_state] = (x, next_action, new_cost)
-    print("No path found")
-    return []
+    raise Exception("No path found")
 
 
 # Abbreviations
