@@ -2,4 +2,4 @@ In this exercise, you'll implement several local search algorithms and test them
 
 To launch the notebook, run the following command from a terminal:
 
-    jupyter notebook AIND-Simulated_Annealing.ipynb
+    jupyter notebook AIND-Local Search.ipynb
