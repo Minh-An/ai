@@ -22,14 +22,23 @@ class AlphaBetaPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
-        depth = 5
+        depth = 3
 
         import random
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
-            self.queue.put(self.alpha_beta_decision(state, depth))
-#            depth += 1
+            action = self.alpha_beta_decision(state, depth)
+            #print("adding ", action)
+            self.queue.put(action)
+            while True:
+                #print(depth)
+                #self.queue.pop()
+                depth += 1
+                action = self.alpha_beta_decision(state, depth)
+                #print("adding ", action)
+                self.queue.put(action)
+        
 
     def my_moves(self, state):
         opponent = (self.player_id+1) % 2

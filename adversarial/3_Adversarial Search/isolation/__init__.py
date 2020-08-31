@@ -180,6 +180,7 @@ def fork_get_action(game_state, active_player, time_limit, debug=False):
             if p and p.is_alive(): p.terminate()
     new_context, action = action_queue.get_nowait()  # raises Empty if agent did not respond
     active_player.context = new_context
+    #print("Get_Action returns", action)
     return action
 
 
