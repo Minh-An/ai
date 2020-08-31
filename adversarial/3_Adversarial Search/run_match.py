@@ -13,7 +13,7 @@ from multiprocessing.pool import ThreadPool as Pool
 
 from isolation import Isolation, Agent, play
 from sample_players import RandomPlayer, GreedyPlayer, MinimaxPlayer
-from my_custom_player import CustomPlayer
+from my_custom_player import CustomPlayer, AlphaBetaPlayer
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,8 @@ TEST_AGENTS = {
     "RANDOM": Agent(RandomPlayer, "Random Agent"),
     "GREEDY": Agent(GreedyPlayer, "Greedy Agent"),
     "MINIMAX": Agent(MinimaxPlayer, "Minimax Agent"),
-    "SELF": Agent(CustomPlayer, "Custom TestAgent")
+    "SELF": Agent(CustomPlayer, "Custom TestAgent"),
+    "ALPHABETA": Agent(AlphaBetaPlayer, "Alpha-Beta Pruning Agent")
 }
 
 Match = namedtuple("Match", "players initial_state time_limit match_id debug_flag")
@@ -105,7 +106,7 @@ def play_matches(custom_agent, test_agent, cli_args):
 
 def main(args):
     test_agent = TEST_AGENTS[args.opponent.upper()]
-    custom_agent = Agent(CustomPlayer, "Custom Agent")
+    custom_agent = TEST_AGENTS[args.customplayer.upper()]
     wins, num_games = play_matches(custom_agent, test_agent, args)
 
     logger.info("Your agent won {:.1f}% of matches against {}".format(
@@ -162,6 +163,13 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         '-o', '--opponent', type=str, default='MINIMAX', choices=list(TEST_AGENTS.keys()),
+        help="""\
+            Choose an agent for testing. The random and greedy agents may be useful 
+            for initial testing because they run more quickly than the minimax agent.
+        """
+    )
+    parser.add_argument(
+        '-c', '--customplayer', type=str, default='SELF', choices=list(TEST_AGENTS.keys()),
         help="""\
             Choose an agent for testing. The random and greedy agents may be useful 
             for initial testing because they run more quickly than the minimax agent.
