@@ -30,13 +30,14 @@ class AlphaBetaPlayer(DataPlayer):
             self.queue.put(random.choice(state.actions()))
         else:
             self.queue.put(random.choice(state.actions()))
-            action = self.alpha_beta_decision(state, depth)
-            self.queue.put(action)
+            while True:
+                action = self.alpha_beta_decision(state, depth)
+                self.queue.put(action)
+                depth += 1
+            
             #print(self.player_id, action)
             #self.queue.put(random.choice(state.actions()))
-            # while True:
-            #     #print(depth)
-            #     depth += 1
+                 #print(depth)
             #     action = self.alpha_beta_decision(state, depth)
             #     #print("adding ", action)
             #     self.queue.put(action)
@@ -108,28 +109,28 @@ class CustomPlayer(AlphaBetaPlayer):
     **********************************************************************
     """
 
-    # def get_action(self, state):
-    #     """ Employ an adversarial search technique to choose an action
-    #     available in the current state calls self.queue.put(ACTION) at least
+    def get_action(self, state):
+        """ Employ an adversarial search technique to choose an action
+        available in the current state calls self.queue.put(ACTION) at least
 
-    #     This method must call self.queue.put(ACTION) at least once, and may
-    #     call it as many times as you want; the caller will be responsible
-    #     for cutting off the function after the search time limit has expired.
+        This method must call self.queue.put(ACTION) at least once, and may
+        call it as many times as you want; the caller will be responsible
+        for cutting off the function after the search time limit has expired.
 
-    #     See RandomPlayer and GreedyPlayer in sample_players for more examples.
+        See RandomPlayer and GreedyPlayer in sample_players for more examples.
 
-    #     **********************************************************************
-    #     NOTE: 
-    #     - The caller is responsible for cutting off search, so calling
-    #       get_action() from your own code will create an infinite loop!
-    #       Refer to (and use!) the Isolation.play() function to run games.
-    #     **********************************************************************
-    #     """
-    #     # TODO: Replace the example implementation below with your own search
-    #     #       method by combining techniques from lecture
-    #     #
-    #     # EXAMPLE: choose a random move without any search--this function MUST
-    #     #          call self.queue.put(ACTION) at least once before time expires
-    #     #          (the timer is automatically managed for you)
-    #     import random
-    #     self.queue.put(random.choice(state.actions()))
+        **********************************************************************
+        NOTE: 
+        - The caller is responsible for cutting off search, so calling
+          get_action() from your own code will create an infinite loop!
+          Refer to (and use!) the Isolation.play() function to run games.
+        **********************************************************************
+        """
+        # TODO: Replace the example implementation below with your own search
+        #       method by combining techniques from lecture
+        #
+        # EXAMPLE: choose a random move without any search--this function MUST
+        #          call self.queue.put(ACTION) at least once before time expires
+        #          (the timer is automatically managed for you)
+        import random
+        self.queue.put(random.choice(state.actions()))
