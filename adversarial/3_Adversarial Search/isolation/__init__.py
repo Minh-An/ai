@@ -158,6 +158,7 @@ def _play(agents, game_state, time_limit, match_id, debug=False):
             winner, loser = loser, winner  # swap winner/loser if active player won
 
     logger.info(RESULT_INFO.format(status, game_state, game_history, winner, loser))
+    print("Match ", "played")
     return winner, game_history, match_id
 
 

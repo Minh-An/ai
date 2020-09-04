@@ -1,5 +1,7 @@
 
 from sample_players import DataPlayer
+import random
+
 
 class AlphaBetaPlayer(DataPlayer):
     """ Implement your own agent to play knight's Isolation
@@ -22,32 +24,31 @@ class AlphaBetaPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
-        depth = 3
+        depth = 8
 
-        import random
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
+            self.queue.put(random.choice(state.actions()))
             action = self.alpha_beta_decision(state, depth)
-            #print("adding ", action)
             self.queue.put(action)
-            while True:
-                #print(depth)
-                #self.queue.pop()
-                depth += 1
-                action = self.alpha_beta_decision(state, depth)
-                #print("adding ", action)
-                self.queue.put(action)
-        
+            #print(self.player_id, action)
+            #self.queue.put(random.choice(state.actions()))
+            # while True:
+            #     #print(depth)
+            #     depth += 1
+            #     action = self.alpha_beta_decision(state, depth)
+            #     #print("adding ", action)
+            #     self.queue.put(action)
 
     def my_moves(self, state):
-        opponent = (self.player_id+1) % 2
-        return len(state.liberties(state.locs[self.player_id])) - 2*len(state.liberties(state.locs[opponent]))
+        opponent = (1-self.player_id)
+        return len(state.liberties(state.locs[self.player_id])) - len(state.liberties(state.locs[opponent]))
 
     def min_value(self, state, depth, alpha, beta):
         if state.terminal_test():
             return state.utility(self.player_id)
-        if depth == 0:
+        if depth <= 0:
             return self.my_moves(state)
 
         v = float('inf')
@@ -61,7 +62,7 @@ class AlphaBetaPlayer(DataPlayer):
     def max_value(self, state, depth, alpha, beta):
         if state.terminal_test():
             return state.utility(self.player_id)
-        if depth == 0:
+        if depth <= 0:
             return self.my_moves(state)
 
         v = float('-inf')
@@ -81,10 +82,12 @@ class AlphaBetaPlayer(DataPlayer):
             v = self.min_value(state.result(a), depth-1, alpha, beta)
             alpha = max(alpha, v)
             #print(v)
-            if v >= best_score:
+            if v > best_score:
                 best_score = v
                 best_move = a
         #print(best_score, best_move, state.actions())
+        if best_move == None:
+            return random.choice(state.actions())
         return best_move
 
 class CustomPlayer(AlphaBetaPlayer):
