@@ -1,6 +1,6 @@
 
 from sample_players import DataPlayer
-import random
+import random, math
 
 
 class AlphaBetaPlayer(DataPlayer):
@@ -34,13 +34,6 @@ class AlphaBetaPlayer(DataPlayer):
                 action = self.alpha_beta_decision(state, depth)
                 self.queue.put(action)
                 depth += 1
-            
-            #print(self.player_id, action)
-            #self.queue.put(random.choice(state.actions()))
-                 #print(depth)
-            #     action = self.alpha_beta_decision(state, depth)
-            #     #print("adding ", action)
-            #     self.queue.put(action)
 
     def my_moves(self, state):
         opponent = (1-self.player_id)
@@ -91,46 +84,84 @@ class AlphaBetaPlayer(DataPlayer):
             return random.choice(state.actions())
         return best_move
 
-class CustomPlayer(AlphaBetaPlayer):
-    """ Implement your own agent to play knight's Isolation
+'''
+Implements the Monte Carlo Search Tree Advanced Search Algorithm 
+'''
+class CustomPlayer(DataPlayer):
+    
+    class Node:
+        def __init__(self, state, parent=None):
+            self.state = state
+            self.parent = parent
+            self.children = {} # key is the action that leads the parent to the action
+            self.Q = 0
+            self._untried_actions = None
+            self.n = 0 # how many times this node is visited
 
-    The get_action() method is the only required method for this project.
-    You can modify the interface for get_action by adding named parameters
-    with default values, but the function MUST remain compatible with the
-    default interface.
+        @property
+        def untried_actions(self):
+            if self._untried_actions is None:
+                self._untried_actions = self.state.actions()
+            return self._untried_actions
 
-    **********************************************************************
-    NOTES:
-    - The test cases will NOT be run on a machine with GPU access, nor be
-      suitable for using any other machine learning techniques.
+        def best_child(self, c = 1.4):
+            return max(self.children.values(), key=lambda x: x.Q/x.n + c*math.sqrt(math.log(self.n)/x.n))
+            
+        def best_action(self):
+            if len(self.children) == 0:
+                return random.choice(self.state.actions())
+            _, best_move = max([(c.Q/c.n, a) for a, c in self.children.items()])
+            return best_move
 
-    - You can pass state forward to your agent on the next turn by assigning
-      any pickleable object to the self.context attribute.
-    **********************************************************************
-    """
+        def expand(self):
+            action = self.untried_actions.pop()
+            next_state = self.state.result(action)
+            child_node = CustomPlayer.Node(next_state, self)
+            self.children[action] = child_node
+            return child_node
+
+        def rollout_policy(self):
+            state = self.state
+            while not state.terminal_test():
+                state = state.result(random.choice(state.actions()))
+            return +1 if state.utility(self.state.player()) < 0 else -1
+
+        def backpropagate(self, result):
+            self.n += 1
+            self.Q += result
+            if self.parent:
+                self.parent.backpropagate(-result)
+
+    def __init__(self, player_id):
+        super().__init__(player_id)
+        self.root = None
 
     def get_action(self, state):
-        """ Employ an adversarial search technique to choose an action
-        available in the current state calls self.queue.put(ACTION) at least
+        if state.ply_count < 2:
+            self.queue.put(random.choice(state.actions()))
+        else:
+            self.root = CustomPlayer.Node(state)
+            self.queue.put(random.choice(state.actions()))
+            while True:
+                # for i in range(900):
+                #     node = self._tree_policy()
+                #     result = node.rollout_policy()
+                #     node.backpropagate(result)
+                #     if i%10==0:
+                self.queue.put(self._monte_carlo())
 
-        This method must call self.queue.put(ACTION) at least once, and may
-        call it as many times as you want; the caller will be responsible
-        for cutting off the function after the search time limit has expired.
+    # adds another action to the queue to update everytime expansion and backup is done
+    def _monte_carlo(self,):
+        node = self._tree_policy()
+        result = node.rollout_policy()
+        node.backpropagate(result)
+        return self.root.best_action()
 
-        See RandomPlayer and GreedyPlayer in sample_players for more examples.
-
-        **********************************************************************
-        NOTE: 
-        - The caller is responsible for cutting off search, so calling
-          get_action() from your own code will create an infinite loop!
-          Refer to (and use!) the Isolation.play() function to run games.
-        **********************************************************************
-        """
-        # TODO: Replace the example implementation below with your own search
-        #       method by combining techniques from lecture
-        #
-        # EXAMPLE: choose a random move without any search--this function MUST
-        #          call self.queue.put(ACTION) at least once before time expires
-        #          (the timer is automatically managed for you)
-        import random
-        self.queue.put(random.choice(state.actions()))
+    def _tree_policy(self):
+        node = self.root
+        while not node.state.terminal_test():
+            if not len(node.untried_actions) == 0:
+                return node.expand()
+            else:
+                node = node.best_child()
+        return node
