@@ -24,12 +24,11 @@ class AlphaBetaPlayer(DataPlayer):
         # EXAMPLE: choose a random move without any search--this function MUST
         #          call self.queue.put(ACTION) at least once before time expires
         #          (the timer is automatically managed for you)
-        depth = 8
+        depth = 5
 
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
-            self.queue.put(random.choice(state.actions()))
             while True:
                 action = self.alpha_beta_decision(state, depth)
                 self.queue.put(action)
@@ -48,9 +47,9 @@ class AlphaBetaPlayer(DataPlayer):
         v = float('inf')
         for a in state.actions():
             v = min(self.max_value(state.result(a), depth-1, alpha, beta), v)
+            beta = min(beta, v)
             if v <= alpha:
                return v
-            beta = min(beta, v)
         return v
 
     def max_value(self, state, depth, alpha, beta):
@@ -62,9 +61,9 @@ class AlphaBetaPlayer(DataPlayer):
         v = float('-inf')
         for a in state.actions():
             v = max(self.min_value(state.result(a), depth-1, alpha, beta), v)
+            alpha = max(alpha, v)
             if v >= beta:
                return v
-            alpha = max(alpha, v)
         return v
 
     def alpha_beta_decision(self, state, depth):
